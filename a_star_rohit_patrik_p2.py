@@ -64,14 +64,14 @@ def move(lst,thet):
 
 # Start the algorithm, ask for user input in the given format, out of reachable points
 while True:
-    print("Enter clearance and radius values separated by a space (e.g. 5 10): ")
+    print("Enter clearance (e.g. 5): ")
     user_input = input()
-    match = re.match(r'^\s*(\d+)\s+(\d+)\s*$', user_input)
+    match = re.match(r'^\s*(\d+)\s*$', user_input)
     if match:
         clearance = int(match.group(1))
-        radius = int(match.group(2))
-        if clearance < 0 or radius < 0:
-            print("Clearance and radius values must be positive. Please try again.")
+        radius = 1 ### change this
+        if clearance < 0:
+            print("Clearance  must be positive. Please try again.")
         else:
             cr=clearance+radius
             # Define the hexagon in the center with original dimensions
@@ -104,21 +104,8 @@ while True:
             del pix
             break
     else:
-        print("Invalid input. Please enter clearance and radius values separated by a space, both of which should be positive integers.")
+        print("Invalid input. Please enter clearance, which should be positive integer.")
 
-# Loop for giving step size input and checking the input is valid
-while True:
-    print("Enter a step size between 1 and 10: ")
-    user_input = input()
-    match = re.match(r'^\s*(\d+)\s*$', user_input)
-    if match:
-        l = int(match.group(1))
-        if l < 1 or l > 10:
-            print("Step size should be a positive integer between 1 and 10. Please try again.")
-        else:
-            break
-    else:
-        print("Invalid input. Please enter a positive integer between 1 and 10 as the step size.")
 
 # Loop to get start nodes and check if it is a valid start node.
 while True:
@@ -143,24 +130,33 @@ while True:
 
 #Loop to get start nodes and check if it is a valid goal node
 while True:
-    print("Enter goal x,y,theta coordinates (e.g. 2,3,60): ")
+    print("Enter goal x,y coordinates (e.g. 2,3): ")
     user_input = input()
-    match = re.match(r'^\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?[0-9]*[0-9]*0)\s*$', user_input)
+    match = re.match(r'^\s*(\d+)\s*,\s*(\d+)\s*', user_input)
     if match:
         x = int(match.group(1))
         y = 250-int(match.group(2))
-        theta = int(match.group(3))
-        if not (-180 <= theta <= 180 and theta % 30 == 0)and (x>0 and x<600) and (y>0 and y<250):
-            print("Invalid input for theta. Please enter an angle in degrees between -180 and 180 that is a multiple of 30 degrees.")
-            continue
         if arr[x, y] == 1:
             print("Goal is inside of an obstacle, please try again")
         else:
             goal = (x, y) #goal position
-            g_theta=theta #goal theta
             break
     else:
-        print("Invalid input. Please enter x,y,theta coordinates in the format 'x,y,theta', where theta is an angle in degrees and a multiple of 30 degrees from -180 to 180.")
+        print("Invalid input. Please enter x,y coordinates in the format 'x,y'.")
+
+
+# Loop to get the RPM values.
+while True:
+    print("Enter the RPM values separated by comma(e.g. 100,50): ")
+    user_input = input()
+    match = re.match(r'^\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?[0-9]*[0-9]*0)\s*$', user_input)
+    if match:
+        RPM1= int(match.group(1))
+        RPM2= int(match.group(2))
+        break
+    else:
+        print("Invalid input. Please enter the RPM values in the format 'RPM1,RPM2'")
+
 
 
 # Defining the require variables for the algorithm, the pixels is a dictionary for the explored nodes
