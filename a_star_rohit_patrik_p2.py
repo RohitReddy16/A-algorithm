@@ -6,6 +6,7 @@ import re
 import time
 import math
 
+
 # Initializing the three used colors
 color = (255,255,255)
 color_2 = (255,200,150)
@@ -13,54 +14,79 @@ color_3=(0,0,0)
 
 # Initializing the map
 pygame.init()
-width_, height_ = 600, 250
+width_, height_ = 600, 200
 
 # Initializing surface
 surface = pygame.Surface((width_,height_))
 surface.fill(color_2)
 goal=None # goal
-l=None #step size
 
 # Checking the path to do not go through obstackles, all the points are calculated between the start and end point
-def bresenham_line(x0, y0, x1, y1):
-    points = []
-    dx = abs(x1 - x0)
-    dy = abs(y1 - y0)
-    sx = 1 if x0 < x1 else -1
-    sy = 1 if y0 < y1 else -1
-    err = dx - dy
+# def bresenham_line(x0, y0, x1, y1):
+#     points = []
+#     dx = abs(x1 - x0)
+#     dy = abs(y1 - y0)
+#     sx = 1 if x0 < x1 else -1
+#     sy = 1 if y0 < y1 else -1
+#     err = dx - dy
 
-    while x0 != x1 or y0 != y1:
-        points.append((x0, y0))
-        e2 = 2 * err
-        if e2 > -dy:
-            err -= dy
-            x0 += sx
-        if e2 < dx:
-            err += dx
-            y0 += sy
+#     while x0 != x1 or y0 != y1:
+#         points.append((x0, y0))
+#         e2 = 2 * err
+#         if e2 > -dy:
+#             err -= dy
+#             x0 += sx
+#         if e2 < dx:
+#             err += dx
+#             y0 += sy
 
-    points.append((x0, y0))
-    return points
+#     points.append((x0, y0))
+#     return points
 
 
 # Function for action set
 # 0:2left,1:left,2:forward,3:right,4:2right:
-def move(lst,thet):
+def move(lst,RPM):
+    def cost_c(Xi,Yi,Thetai,UL,UR):
+        way=[]
+        t = 0
+        r = 0.033*100
+        L = 0.16*100
+        dt = 0.1
+        Xn=Xi
+        Yn=Yi
+        Thetan = 3.14 * Thetai / 180
+
+
+    # Xi, Yi,Thetai: Input point's coordinates
+    # Xn, Yn, Thetan: End point coordintes
+        D=0
+        while t<1:
+            t = t + dt
+            Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt
+            Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
+            Thetan += (r / L) * (UR - UL) * dt
+            D=D+ math.sqrt(math.pow((0.5*r * (UL + UR) * math.cos(Thetan) * dt),2)+math.pow((0.5*r * (UL + UR) * math.sin(Thetan) * dt),2))
+            way.append((round(Xn),round(Yn)))
+        Thetan = 180 * (Thetan) / 3.14
+        return round(Xn), round(Yn), round(Thetan), D, way
+        
+
+
     # Extracting the information
     coords=list(lst[3])
-    cost2come=lst[5]+l
+    cost2come=lst[5]
     x_s=coords[0]
     y_s=coords[1]
     theta_t=lst[4]
     # Generating the result
-    theta_sum=thet+theta_t
-    x_n=round(x_s+(l*np.cos(np.deg2rad(theta_sum))))
-    y_n=round(y_s+(l*np.sin(np.deg2rad(theta_sum))))
-    rode = bresenham_line(x_s,y_s,x_n,y_n)
+    x_n,y_n,theta_n,c_n,rode=cost_c(x_s,y_s,theta_t,RPM[0],RPM[1])
+    
+    # rode = bresenham_line(x_s,y_s,x_n,y_n)
     cost2go=math.dist((x_n,y_n),goal)
-    cost=cost2go+cost2come
-    return(tuple((x_n,y_n)), theta_sum,cost,rode,cost2come,cost2go)
+    new_cost_2_come=cost2come+c_n
+    cost=cost2go+new_cost_2_come
+    return(tuple((x_n,y_n)), theta_n,cost,rode,new_cost_2_come,cost2go)
 
 # Start the algorithm, ask for user input in the given format, out of reachable points
 while True:
@@ -69,28 +95,25 @@ while True:
     match = re.match(r'^\s*(\d+)\s*$', user_input)
     if match:
         clearance = int(match.group(1))
-        radius = 1 ### change this
+        radius = 10.5 ### change this
         if clearance < 0:
             print("Clearance  must be positive. Please try again.")
         else:
             cr=clearance+radius
+            cr2=radius-clearance
+            pygame.draw.rect(surface, color, pygame.Rect(cr, cr, width_-2*cr, height_-2*cr))
+
             # Define the hexagon in the center with original dimensions
             pygame.draw.rect(surface, color, pygame.Rect(cr, cr, width_-2*cr, height_-2*cr))
-            bottom_rect_dim = [(150+cr,150-cr),(150+cr,250),(100-cr,250),(100-cr,150-cr)]
+            bottom_rect_dim = [(250-cr2,200),(265+cr,200),(265+cr,75-cr2),(250-cr2,75-cr2)]
             pygame.draw.polygon(surface, color_2,bottom_rect_dim)
-            top_rect_dim = [(100-cr,0),(150+cr,0),(150+cr,100+cr),(100-cr,100+cr)]
+            top_rect_dim = [(150-cr2,0),(165+cr,0),
+                            (165+cr,125+cr),(150-cr2,125+cr)]
             pygame.draw.polygon(surface,color_2,top_rect_dim)
 
-            # Vertices of hexagon
-            hexagon_dim = [(300,50-cr),(364.95190528+cr,87.5-((cr)*np.tan(np.pi*30/180))),
-                        (364.95190528+cr,162.5+((cr)*np.tan(np.pi*30/180))),(300,200+cr),
-                        (235.04809472-cr,162.5+((cr)*np.tan(np.pi*30/180))),
-                        (235.04809472-cr,87.5-((cr)*np.tan(np.pi*30/180)))]
-            pygame.draw.polygon(surface,color_2,hexagon_dim)
+            # Circle
+            pygame.draw.circle(surface, color_2,(400,90),50+cr)
 
-            # Define the triangle with the original dimensions
-            triangle_dim = [(460-cr,25-((cr)/np.tan(np.pi*13.28/180))),(460.00-cr,225+((cr)/np.tan(np.pi*13.28/180))),(510+((cr)/np.cos(np.pi*26.5650518/180)),125)]
-            pygame.draw.polygon(surface,color_2,triangle_dim)
 
             # Convert surface to a 2D array with 0 for the specific color and 1 for other colors
             arr = np.zeros((surface.get_width(), surface.get_height()))
@@ -114,7 +137,7 @@ while True:
     match = re.match(r'^\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?[0-9]*[0-9]*0)\s*$', user_input)
     if match:
         x = int(match.group(1))
-        y = 250-int(match.group(2))
+        y = 200-int(match.group(2))
         theta = int(match.group(3))
         if not (-180 <= theta <= 180 and theta % 30 == 0) and (x>0 and x<600) and (y>0 and y<250):
             print(" Invalid input for theta. Please enter an angle in degrees between -180 and 180 that is a multiple of 30 degrees.")
@@ -128,14 +151,14 @@ while True:
     else:
         print("Invalid input. Please enter x,y,theta coordinates in the format 'x,y,theta', where theta is an angle in degrees and a multiple of 30 degrees from -180 to 180.")
 
-#Loop to get start nodes and check if it is a valid goal node
+# Loop to get start nodes and check if it is a valid goal node
 while True:
     print("Enter goal x,y coordinates (e.g. 2,3): ")
     user_input = input()
     match = re.match(r'^\s*(\d+)\s*,\s*(\d+)\s*', user_input)
     if match:
         x = int(match.group(1))
-        y = 250-int(match.group(2))
+        y = 200-int(match.group(2))
         if arr[x, y] == 1:
             print("Goal is inside of an obstacle, please try again")
         else:
@@ -149,7 +172,7 @@ while True:
 while True:
     print("Enter the RPM values separated by comma(e.g. 100,50): ")
     user_input = input()
-    match = re.match(r'^\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?[0-9]*[0-9]*0)\s*$', user_input)
+    match = re.match(r'^\s*(\d+)\s*,\s*(\d+)\s*', user_input)
     if match:
         RPM1= int(match.group(1))
         RPM2= int(match.group(2))
@@ -196,14 +219,13 @@ while(True):
         print("Goal reached")
         end_time=time.time()# algorithm end time
         break
-    # Looping the five different actions 
-    szog=[-60, -30,0, 30, 60] # possible theta values
-    for i in range(0,5):
-        thet=szog[i]
-        coords,angle,cost,rode,c1,c2=move(first,thet)
+    # Looping the eight different actions 
+    dir=[[0,RPM1],[RPM1,0],[RPM1,RPM1],[0,RPM2],[RPM2,0],[RPM2,RPM2],[RPM1,RPM2],[RPM2,RPM1]] # possible theta values
+    for i in range(0,8):
+        coords,angle,cost,rode,c1,c2=move(first,dir[i])
         # Checking if the new pixel is in the obstacle space or it was already explored, or the path crosses an obstacle or it is not on the map
         if ((not(any(arr[x, y] == 1 for x, y in rode))) and 
-            ((coords[0]>0 and coords[0]<600)and(coords[1]>0 and coords[1]<250)) and 
+            ((coords[0]>0 and coords[0]<600)and(coords[1]>0 and coords[1]<200)) and 
             (not(coords in obstacles)) and (not(coords in closed))):
             # Adding it to the queue if it was not there yet
             if not(coords in global_dict):
