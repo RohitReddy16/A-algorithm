@@ -63,6 +63,7 @@ def move(lst,RPM):
         D=0
         while t<1:
             t = t + dt
+            way.append((round(Xn),round(Yn)))
             Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt
             Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
             Thetan += (r / L) * (UR - UL) * dt
@@ -184,6 +185,7 @@ while True:
 
 # Defining the require variables for the algorithm, the pixels is a dictionary for the explored nodes
 pixels={} # closed list
+exploration={}
 c2c=0 # cost to come
 c2g=math.dist(start,goal) # cost to go
 d1 = [c2g+c2c, 0, -1,start, s_theta,c2c,c2g] # list stores all the information
@@ -217,6 +219,7 @@ while(True):
     if(math.dist(first[3],goal)<=0.5):
         g_key=first[1] # index of the goal node
         print("Goal reached")
+        print("Final cost:",first[0])
         end_time=time.time()# algorithm end time
         break
     # Looping the eight different actions 
@@ -235,7 +238,7 @@ while(True):
                 Q.put(global_dict[coords])
                 line_vector[first[3]].append(coords)
                 child += 1 
-                
+                exploration[coords]=rode
 
             # Updating the dictionary if the coordinate is found with lower cost
             else:
@@ -244,7 +247,8 @@ while(True):
                     global_dict[coords][2]=parent
                     global_dict[coords][0]=cost
                     global_dict[coords][4]=angle
-    
+                    exploration[coords]=rode
+        
 
 # Creating the end display 
 s=pygame.display.set_mode((width_,height_))
@@ -252,10 +256,9 @@ s.blit(surface,(0,0))
 pygame.display.update()
 
 # Showing the exploration for the map
-for k in line_vector.keys():
-    for i in range(0,len(line_vector[k])):
-        pygame.draw.aaline(s,(255,0,0),k,line_vector[k][i])
-        pygame.display.update()
+for k in exploration.keys():
+    pygame.draw.lines(s,(255,0,0),False,exploration[k])
+    pygame.display.update()
 
 print("Len:",len(pixels))
 # Showing the optimal path if the goal was found using the parent child relationship stored in the dictionary
@@ -263,19 +266,36 @@ if(not (Q.empty())):
     value = g_key
     # Backtrack and generate the solution path
     path=[]
+    path2=[]
     while(pixels[value][1]!=-1):
         path.append(pixels[value][2])
         value=pixels[value][1]
+        if(pixels[value][2]!=(15,185)):
+            path2.extend(exploration[pixels[value][2]])
+            print("k")
     path.append(pixels[value][2])
+    if(pixels[value][2]!=(15,185)):
+        path2.extend(exploration[pixels[value][2]])
     path.reverse()
+    path2.reverse()
     
-    # Displaying the path with blue 
-    for i,walk in enumerate(path):
-        if(i+1>len(path)-1):
-            break
-        pygame.draw.line(s,(0,0,255),walk,path[i+1],width=1)
-        pygame.display.update()
+    # # Displaying the path with blue 
+    # for i,walk in enumerate(path):
+    #     if(i+1>len(path)-1):
+    #         break
+    #     pygame.draw.line(s,(0,0,255),walk,path[i+1],width=1)
+    #     pygame.display.update()
+         # Displaying the path with blue 
+    # for i,walk in enumerate(path2):
+    #     if(i+1>len(path2)-1):
+    #         break
+    #     print(path2[i])
+    #     pygame.draw.line(s,(0,0,255),walk,path2[i+1],width=1)
+    #     pygame.display.update()
 
+    
+    pygame.draw.lines(s,(0,0,255),False,path2)
+    pygame.display.update()
     
 # Printing the time used by the algorithm
 print('Time:',end_time-start_time)
