@@ -51,8 +51,6 @@ def move(lst,RPM):
         Thetan = 180 * (Thetan) / 3.14
         return round(Xn), round(Yn), round(Thetan), D, way
         
-
-
     # Extracting the information
     coords=list(lst[3])
     cost2come=lst[5]
@@ -62,7 +60,6 @@ def move(lst,RPM):
     # Generating the result
     x_n,y_n,theta_n,c_n,rode=cost_c(x_s,y_s,theta_t,RPM[0],RPM[1])
     
-    # rode = bresenham_line(x_s,y_s,x_n,y_n)
     cost2go=math.dist((x_n,y_n),goal)
     new_cost_2_come=cost2come+c_n
     cost=cost2go+new_cost_2_come
@@ -81,6 +78,7 @@ while True:
         else:
             cr=clearance+radius
             cr2=radius-clearance
+            #Drawing the map with obstacles
             pygame.draw.rect(surface, color, pygame.Rect(cr, cr, width_-2*cr, height_-2*cr))
 
             # Define the hexagon in the center with original dimensions
@@ -91,7 +89,7 @@ while True:
                             (165+cr,125+cr),(150-cr2,125+cr)]
             pygame.draw.polygon(surface,color_2,top_rect_dim)
 
-            # Circle
+            # Drawing a circle
             pygame.draw.circle(surface, color_2,(400,90),50+cr)
 
 
@@ -108,7 +106,6 @@ while True:
             break
     else:
         print("Invalid input. Please enter clearance, which should be positive integer.")
-
 
 # Loop to get start nodes and check if it is a valid start node.
 while True:
@@ -131,7 +128,7 @@ while True:
     else:
         print("Invalid input. Please enter x,y,theta coordinates in the format 'x,y,theta', where theta is an angle in degrees and a multiple of 30 degrees from -180 to 180.")
 
-# Loop to get start nodes and check if it is a valid goal node
+# Loop to get gosl nodes and check if it is a valid goal node
 while True:
     print("Enter goal x,y coordinates (e.g. 2,3): ")
     user_input = input()
@@ -147,7 +144,6 @@ while True:
     else:
         print("Invalid input. Please enter x,y coordinates in the format 'x,y'.")
 
-
 # Loop to get the RPM values.
 while True:
     print("Enter the RPM values separated by comma(e.g. 100,50): ")
@@ -160,11 +156,9 @@ while True:
     else:
         print("Invalid input. Please enter the RPM values in the format 'RPM1,RPM2'")
 
-
-
 # Defining the require variables for the algorithm, the pixels is a dictionary for the explored nodes
 pixels={} # closed list
-exploration={}
+exploration={} #list to get exploration nodes of path
 c2c=0 # cost to come
 c2g=math.dist(start,goal) # cost to go
 d1 = [c2g+c2c, 0, -1,start, s_theta,c2c,c2g] # list stores all the information
@@ -238,7 +232,7 @@ pygame.display.update()
 for k in exploration.keys():
     pygame.draw.lines(s,(255,0,0),False,exploration[k])
     pygame.display.update()
-
+#printing the length of pixles explored
 print("Len:",len(pixels))
 # Showing the optimal path if the goal was found using the parent child relationship stored in the dictionary
 if(not (Q.empty())):   
@@ -267,8 +261,7 @@ if(not (Q.empty())):
         
         pygame.draw.line(s,(0,0,255),walk,path2[i+1],width=1)
         pygame.display.update()
-   
-    
+       
 # Printing the time used by the algorithm
 print('Time:',end_time-start_time)
 # Showing the screen
