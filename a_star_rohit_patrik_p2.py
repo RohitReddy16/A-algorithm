@@ -242,11 +242,9 @@ if(not (Q.empty())):
             # print("k")
         value=pixels[value][1]
     path.append(pixels[value][2])
-    print("vege")
     path.reverse()
     path2.reverse()
-    print("path:",path)
-    print("path2",path2)
+    
     # # Displaying the path with blue 
      
     for i,walk in enumerate(path2):
