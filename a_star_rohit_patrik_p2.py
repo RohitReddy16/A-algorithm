@@ -6,7 +6,6 @@ import re
 import time
 import math
 
-
 # Initializing the three used colors
 color = (255,255,255)
 color_2 = (255,200,150)
@@ -21,8 +20,6 @@ surface = pygame.Surface((width_,height_))
 surface.fill(color_2)
 goal=None # goal
 
-
-
 # Function for action set
 # 0:2left,1:left,2:forward,3:right,4:2right:
 def move(lst,RPM):
@@ -35,8 +32,6 @@ def move(lst,RPM):
         Xn=Xi
         Yn=Yi
         Thetan = 3.14 * Thetai / 180
-
-
     # Xi, Yi,Thetai: Input point's coordinates
     # Xn, Yn, Thetan: End point coordintes
         D=0
@@ -222,7 +217,6 @@ while(True):
                     global_dict[coords][4]=angle
                     exploration[coords]=rode
         
-
 # Creating the end display 
 s=pygame.display.set_mode((width_,height_))
 s.blit(surface,(0,0))
@@ -257,8 +251,7 @@ if(not (Q.empty())):
      
     for i,walk in enumerate(path2):
         if(i+1>len(path2)-1):
-            break
-        
+            break        
         pygame.draw.line(s,(0,0,255),walk,path2[i+1],width=1)
         pygame.display.update()
        
