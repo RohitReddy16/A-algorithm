@@ -1,5 +1,5 @@
 Author: Rohit Reddy Pakhala(rpakhala,119399125), Patrik Dominik Pördi(ppordi, 119367223)
-Code: a_star_rohit_patrik.py
+Code: a_star_rohit_patrik_p2.py
 Instuctions:
     To run the program ensure that you have the following libraries:
     time, pygame, numpy, queue, re, math    
