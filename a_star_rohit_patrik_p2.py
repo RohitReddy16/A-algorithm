@@ -21,27 +21,6 @@ surface = pygame.Surface((width_,height_))
 surface.fill(color_2)
 goal=None # goal
 
-# Checking the path to do not go through obstackles, all the points are calculated between the start and end point
-# def bresenham_line(x0, y0, x1, y1):
-#     points = []
-#     dx = abs(x1 - x0)
-#     dy = abs(y1 - y0)
-#     sx = 1 if x0 < x1 else -1
-#     sy = 1 if y0 < y1 else -1
-#     err = dx - dy
-
-#     while x0 != x1 or y0 != y1:
-#         points.append((x0, y0))
-#         e2 = 2 * err
-#         if e2 > -dy:
-#             err -= dy
-#             x0 += sx
-#         if e2 < dx:
-#             err += dx
-#             y0 += sy
-
-#     points.append((x0, y0))
-#     return points
 
 
 # Function for action set
@@ -61,9 +40,9 @@ def move(lst,RPM):
     # Xi, Yi,Thetai: Input point's coordinates
     # Xn, Yn, Thetan: End point coordintes
         D=0
+        way.append((round(Xn),round(Yn)))
         while t<1:
             t = t + dt
-            way.append((round(Xn),round(Yn)))
             Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt
             Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
             Thetan += (r / L) * (UR - UL) * dt
@@ -269,33 +248,26 @@ if(not (Q.empty())):
     path2=[]
     while(pixels[value][1]!=-1):
         path.append(pixels[value][2])
+        
+        if(pixels[value][2]!=(start)):
+            path2.extend(reversed(exploration[pixels[value][2]]))
+            # print("k")
         value=pixels[value][1]
-        if(pixels[value][2]!=(15,185)):
-            path2.extend(exploration[pixels[value][2]])
-            print("k")
     path.append(pixels[value][2])
-    if(pixels[value][2]!=(15,185)):
-        path2.extend(exploration[pixels[value][2]])
+    print("vege")
     path.reverse()
     path2.reverse()
-    
+    print("path:",path)
+    print("path2",path2)
     # # Displaying the path with blue 
-    # for i,walk in enumerate(path):
-    #     if(i+1>len(path)-1):
-    #         break
-    #     pygame.draw.line(s,(0,0,255),walk,path[i+1],width=1)
-    #     pygame.display.update()
-         # Displaying the path with blue 
-    # for i,walk in enumerate(path2):
-    #     if(i+1>len(path2)-1):
-    #         break
-    #     print(path2[i])
-    #     pygame.draw.line(s,(0,0,255),walk,path2[i+1],width=1)
-    #     pygame.display.update()
-
-    
-    pygame.draw.lines(s,(0,0,255),False,path2)
-    pygame.display.update()
+     
+    for i,walk in enumerate(path2):
+        if(i+1>len(path2)-1):
+            break
+        
+        pygame.draw.line(s,(0,0,255),walk,path2[i+1],width=1)
+        pygame.display.update()
+   
     
 # Printing the time used by the algorithm
 print('Time:',end_time-start_time)
