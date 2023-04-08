@@ -7,7 +7,7 @@ import re
 import time
 import math
 from geometry_msgs.msg import Twist
-# import rospy
+import rospy
 
 # Initializing the three used colors
 color = (255,255,255)
@@ -27,7 +27,7 @@ goal=None # goal
 # Based on the given actionset the new node and the corresponding values are calculated
 def move(lst,RPM):
     def cost_c(Xi,Yi,Thetai,UL,UR):
-        way=[]# path to avoide going through obstackles and to curve the path
+        way=[] # path to avoide going through obstackles and to curve the path
         way_ros=[]# ros visualization
         t = 0
         r = 0.033*100
@@ -245,6 +245,7 @@ if(not (Q.empty())):
     ros_path=[]
     while(pixels[value][1]!=-1):
         path.append(pixels[value][2])
+        
         # Curved and ROS Path
         if(pixels[value][2]!=(start)):
             path2.extend(reversed(exploration[pixels[value][2]]))
@@ -270,6 +271,58 @@ print('Time:',end_time-start_time)
 # Showing the screen
 running = True
 pygame.time.wait(10000)
+
+
+print("I'm done till here")
+
+
+rospy.init_node('ROS_AStar', anonymous=True)
+pub_vel = rospy.Publisher('cmd_vel',Twist,queue_size=100)
+msg = Twist()
+turtle_model = rospy.get_param("model","burger")
+msg.linear.x = 0.0
+msg.linear.y = 0.0
+msg.linear.z = 0.0
+msg.angular.x = 0.0
+msg.angular.y = 0.0
+msg.angular.z = 0.0
+
+pub_vel.publish(msg)
+# publishing rate
+ratee = rospy.Rate(1.1)
+t =1 #Time step
+r = 0.033
+L = 0.16
+
+# Moving the turtlebot
+for i in range(len(ros_path)):
+    
+    # Calculation of the linear and angular velocity
+    x,y,th,rp=ros_path[i]
+    dt = 1
+    ul,ur = rp
+    ul = ul * 2 * math.pi / 60
+    ur = ur * 2 * math.pi /60
+    tn = 3.14 * th/180
+    t_dot = (r/L)*(ur-ul)
+    tdif = t_dot+tn
+    xdot = (r/2)*(ur+ul)*math.cos(tdif)
+    ydot = (r/2)*(ur+ul)*math.sin(tdif)
+    vel_inp = math.sqrt(xdot**2 + ydot**2)
+    msg.linear.x = vel_inp
+    msg.angular.z = -t_dot
+    pub_vel.publish(msg)
+    ratee.sleep()
+
+msg.linear.x = 0.0
+msg.linear.y = 0.0
+msg.linear.z = 0.0
+msg.angular.x = 0.0
+msg.angular.y = 0.0
+msg.angular.z = 0.0
+
+pub_vel.publish(msg)
+
 # Game loop
 while running:
 # For loop through the event queue  
@@ -278,63 +331,3 @@ while running:
         if event.type == pygame.QUIT:
             pygame.quit()
             running = False
-
-
-# print("I'm done till here")
-
-
-# rospy.init_node('ROS_AStar', anonymous=True)
-# pub_vel = rospy.Publisher('cmd_vel',Twist,queue_size=100)
-# msg = Twist()
-# turtle_model = rospy.get_param("model","burger")
-# msg.linear.x = 0.0
-# msg.linear.y = 0.0
-# msg.linear.z = 0.0
-# msg.angular.x = 0.0
-# msg.angular.y = 0.0
-# msg.angular.z = 0.0
-
-# pub_vel.publish(msg)
-# # publishing rate
-# ratee = rospy.Rate(1.1)
-# t =1 #Time step
-# r = 0.033
-# L = 0.16
-
-# # Moving the turtlebot
-# for i in range(len(ros_path)):
-    
-#     # Calculation of the linear and angular velocity
-#     x,y,th,rp=ros_path[i]
-#     dt = 1
-#     ul,ur = rp
-#     ul = ul * 2 * math.pi / 60
-#     ur = ur * 2 * math.pi /60
-#     tn = 3.14 * th/180
-#     t_dot = (r/L)*(ur-ul)
-#     tdif = t_dot+tn
-#     xdot = (r/2)*(ur+ul)*math.cos(tdif)
-#     ydot = (r/2)*(ur+ul)*math.sin(tdif)
-#     vel_inp = math.sqrt(xdot**2 + ydot**2)
-#     msg.linear.x = vel_inp
-#     msg.angular.z = -t_dot
-#     pub_vel.publish(msg)
-#     ratee.sleep()
-
-# msg.linear.x = 0.0
-# msg.linear.y = 0.0
-# msg.linear.z = 0.0
-# msg.angular.x = 0.0
-# msg.angular.y = 0.0
-# msg.angular.z = 0.0
-
-# pub_vel.publish(msg)
-
-# # Game loop
-# while running:
-# # For loop through the event queue  
-#     for event in pygame.event.get():
-#         # Check for QUIT event      
-#         if event.type == pygame.QUIT:
-#             pygame.quit()
-#             running = False
